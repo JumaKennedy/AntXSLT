@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Suite" verbose="1" parallel="false">
+<listeners>
+      <listener class-name="org.uncommons.reportng.HTMLReporter"/>
+      <listener class-name="org.uncommons.reportng.JUnitXMLReporter"/>  
+      <listener class-name="listeners.ConsolReportListener"/>
+	  <listener class-name="listeners.ExelReportListener"/>
+	 <!--  <listener class-name="listeners.ConfigurationListerner"/> -->
+</listeners>
+		<parameter name="ssn" value="415248758"/> 
+		<parameter name="dl" value="DL524158"/>	    
+		<parameter name="Id" value="A5125478" />
+		<parameter name="passport" value="P201458777" />
+		<parameter name="zip" value="63011"/> 
+		
+  
+   
+ 
+ <test name="Automated Test Scripts Chrome " preserve-order="false">     
+       <parameter name="browser" value="chrome" /> 
+    <classes>       
+         <class name="testCases.UsingDataProviders"/>
+         
+    </classes>
+  </test> 
+  
+  <!-- <test name="Automated Test Scripts Firefox " preserve-order="false">     
+       <parameter name="browser" value="firefox" /> 
+    <classes>       
+          <class name="testCases.TestFDBelements"/>	  
+    </classes>
+  </test>  -->
+  
+  
+  
+</suite> <!-- Suite -->

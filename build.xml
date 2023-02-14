@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DataDrivenTesting" basedir=".">
+	
+	<target name="info">
+		      <echo>Hello - Welcome to Apache Ant!</echo>
+		   </target>
+		   
+		    <property name="home.dir" value="${basedir}"/>
+		    <property name="build.dir" value="${home.dir}/build"/>
+			<property name="buildlogs.dir" value="${home.dir}/buildlogs"/>
+			<property name="ScreenShots.dir" value="${home.dir}/ScreenShots"/>
+		    <property name="src.dir" value="${home.dir}/src"/>
+		    <property name="ng.result" value="test-output"/>
+		    <property name="ws.jars" value="C:\Selenium\JarFiles"/>
+		    <property name="lib.dir" value="./lib"/>
+		    <property name="browser" value="C:/Program Files (x86)/Mozilla Firefox/firefox"/>
+		    <property name="index.dir" value = "${basedir}/test-output/index.html"/>
+            <property file="${home.dir}/src/db.properties"/>
+			
+			<property environment="env"/>
+	            
+				<target name="hud" >
+	            	<echo> message="hudson is set to = ${env.hudson}" </echo>			    	 
+			    </target>
+				
+				<target name="url" >
+	            	<echo> message="URL for build = ${workspaceUrl} " </echo>			    	 
+			    </target>
+	        
+			
+		<!-- setClassPath -->
+		    <target name="setClassPath">
+		        <path id="classpath_jars">
+		            <pathelement path="${basedir}/" />
+		            <fileset dir="C:\Selenium\JarFiles" includes="*.jar" />
+		        </path>
+		        <pathconvert pathsep=":" property="test.classpath" refid="classpath_jars" />
+		    </target>
+
+		<!-- loadTestNG -->
+		    <target name="loadTestNG" depends="setClassPath">
+		    	<taskdef resource="testngtasks" classpath="${test.classpath}"/> 
+		    	 
+		    </target>
+
+		<!-- build -->
+		    <target name="build">
+		        <mkdir dir="${build.dir}"/>
+		        <tstamp>
+		            <format property="timestamp" pattern="MM-dd-yyyy_(HH-mm-ss)"/>
+		        </tstamp>
+		        <property name="build.log.dir" location="${basedir}/buildlogs"/>
+		        <mkdir dir="${build.log.dir}"/>
+		        <property name="build.log.filename" value="build_${timestamp}.log"/>
+		        <record name="${build.log.dir}/${build.log.filename}" loglevel="verbose" append="false"/>
+		        <echo message="build logged to ${build.log.filename}"/>
+		    </target>
+
+		<!-- Clean -->
+		    <target name="clean">
+		        <echo message="deleting existing build directory"/>
+		        <delete dir="${build.dir}"/>
+				<delete>
+		    	   <fileset dir="${basedir}">
+		    	      <include name="Testlogs.log"/>
+		    	   </fileset>
+		    	</delete>
+				<!-- delete screen-shots
+				<delete includeEmptyDirs="true">
+				<fileset dir="${ScreenShots.dir}" includes="**/*"/>
+				</delete>-->
+		    </target>
+
+		<!-- Compile -->
+	
+	<target name="compile" depends="clean,build,setClassPath,loadTestNG">
+			        <echo message="classpath:${test.classpath}"/>
+			        <echo message="compiling.........."/>
+			        <javac debug="true" destdir="${build.dir}" srcdir="${src.dir}"  includeantruntime="false" classpath="${test.classpath}"/>
+			    </target>
+				
+		<!-- delete old snap-shots-->
+		    <!-- <target name="clear" depends="compile">		        
+				<echo message="deleting existing screen-shots directory"/>
+				<delete dir="${ScreenShots.dir}"/>
+				<delete includeEmptyDirs="true">
+				<fileset dir="${buildlogs.dir}" includes="**/*"/>
+			    </delete>  
+		    </target> -->
+	
+		   
+		<!-- executeApp -->
+		    <target name="run" depends="compile">
+		        <testng classpath="${test.classpath}:${build.dir}">
+		            <xmlfileset dir="${basedir}" includes="testng.xml"/>
+		        </testng>
+		    </target>
+
+		<!-- Report --> 
+		    <target name="testng-xslt-report" depends="run">
+		        <delete dir="${basedir}/testng-xslt"/>
+		        <mkdir dir="${basedir}/testng-xslt"/>		    	
+		    	<mkdir dir="${basedir}/ScreenShots"/>
+		        <xslt in="${basedir}/test-output/testng-results.xml"
+		        style="${basedir}/src/testng-results.xsl" out="${basedir}/testng-xslt/index.html" classpathref ="classpath_jars" processor="SaxonLiaison">
+		            <param expression="${basedir}/testng-xslt/" name="testNgXslt.outputDir"/>
+		        	<param expression="${basedir}" name="testNgXslt.wspaceDir"/>
+		        	<param expression="${workspaceUrl}" name="testNgXslt.url"/>
+		            <param expression="true" name="testNGXslt.sortTestCaseLinks"/>
+		            <param expression="FAIL,SKIP,PASS,BY_CLASS" name="testNgXslt.testDetailsFilter"/>
+		            <param expression="true" name="testNgXslt.showRuntimeTotals"/>
+		            <classpath refid="classpath_jars"/>
+		        </xslt>
+				</target>	
+		 
+
+		<!-- makexsltreports-->
+		    <target name="makexsltreports" depends="testng-xslt-report">
+		        <exec executable="${browser}" spawn="yes">
+		       <arg line="${basedir}\testng-xslt\index.html" />
+		      </exec>
+		     </target>
+			 
+		</project>
